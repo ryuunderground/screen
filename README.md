@@ -20,21 +20,47 @@ score. Fields are rotation-equivariant, so the whole landscape is computable che
 
 ## What's here (code only — no datasets)
 ```
-src/                 feature extraction, scoring, docking, figures
-  v1_*.py            v1 scorer: grid-overlap channels at the crystal pose
-  v2_dock.py         FFT rigid search + greedy torsion (pose search)
-  v4_features.py     geometric directional H-bond channel
-  v5_features.py     + electrostatics + desolvation channels  (best scorer)
-  v6_features.py     + better partial charges (MMFF + formal) — honest negative result
-  v7_pose.py         pose scoring-funnel test (native recognition)
-  v7_fig.py          pose figures
-  make_example_figs.py   result figures + example PDB export
-  *_labels.py / run_*.sh / make_*.py   label/split building, sharded runs, figures
-presentation/        talk material (markdown + result figures + example PDBs for Chimera)
+src/
+  v1_features.py / v1_labels.py / v1_train.py   v1 scorer: grid-overlap channels at crystal pose
+  v2_dock.py / v2_figs.py                        FFT rigid search + greedy torsion (pose search)
+  v3_features.py                                 Vina-style distance-gated pair channels
+  v4_features.py                                 + geometric directional H-bond channel
+  v5_features.py                                 + electrostatics + desolvation  (best scorer)
+  v6_features.py                                 + better partial charges (MMFF + formal) — negative result
+  v{3..6}_train.py / run_v{1..6}_features.sh     training + sharded feature extraction per version
+  v7_pose.py / v7_fig.py                         pose scoring-funnel test + figures
+  make_example_figs.py                           result figures + example PDB export
+  make_figures.py / make_slides.py               schematic figures / slide generation
+  fourier_basics.py / toy_docking_2d.py / concepts_equivariance.py / torsion_spectrum.py /
+  fft_dock_pilot.py / reexpansion_error.py       early concept & pilot studies
+notes/               research log — per-version findings (report_v1_v2 … report_v7, versions_overview)
+presentation/        talk material (markdown + result figures)
 RESEARCH_SUMMARY.md  full write-up of the v1→v7 arc
 ```
+The version-by-version research process is visible in `src/v{1..7}*` and the matching
+`notes/report_v*.md`. Start with `notes/versions_overview.md`.
 Datasets (PDBbind, PoseBusters, LIT-PCBA, COCONUT) and large outputs are **not** in the
 repo; scripts expect them under a local `data/` and write to `out/` (both git-ignored).
+
+## Data (what was used, how many, and what was left out)
+
+**Used for the scorer — PDBbind v2020 "general" set.**
+- Source index: **19,037** labeled protein–ligand complexes (`INDEX_general_PL.2020R1`).
+- **Used: 18,137.** Kept only complexes that had **both** (a) a clean `=` affinity
+  (Kd / Ki / IC50 → pKd = −log₁₀ M) **and** (b) an entry in the LP-PDBBind leak-proof split
+  with a sequence cluster.
+- **Dropped: ~900.** Reasons: the affinity was approximate or a range (`~`, `<`, `>`, or an
+  unparseable unit), **or** the complex was not present in LP-PDBBind (no leak-proof split /
+  cluster). These are excluded rather than guessed.
+- Split (LP-PDBBind): **train 11,044 / val 2,340 / test 4,753**; 11,831 sequence clusters
+  used as CV groups so no fold shares a protein.
+
+**Downloaded and prepared but NOT YET used (benchmarks pending):**
+- **PoseBusters** — intended pose-accuracy benchmark (RMSD < 2 Å); blind docking not run yet.
+- **LIT-PCBA** — intended virtual-screening enrichment benchmark (EF / BEDROC); not run yet.
+- **COCONUT** — natural-product library to screen in the application phase; not screened yet.
+
+Datasets themselves are not redistributed here; see each source for licensing.
 
 ## Results so far (held-out)
 Building the scorer up from shape overlaps to a full, Glide-like channel set:
