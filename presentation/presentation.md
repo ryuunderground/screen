@@ -5,8 +5,9 @@
 그대로 쓴다. **흐름 순서가 핵심이므로 순서를 바꾸지 말 것.**
 
 ## 그림 안내 (중요)
-- `figures/` 폴더에는 **실험해서 모델 성능을 보여주는 결과 그림 4개만** 있다
-  (`channel_climb.png`, `pose_recognition.png`, `pose_example.png`, `pose_funnel.png`).
+- `figures/` 폴더에는 **결과 그림**(`channel_climb.png`, `pose_recognition.png`,
+  `pose_example.png`)과 **M&M용 실측 도식**(`field_cube.png`, `fragmentation.png`,
+  `field_change.png`, `torsion_curve.png`)이 있다.
 - Introduction/Objective/M&M의 **개념 도식**은 성능 figure가 아니라 폴더에 없다. 해당 슬라이드는
   `[개념 도식]`으로 표시 — 기존 `../slides/assets/`를 쓰거나 새로 그린다.
 - **Results 슬라이드만 `figures/`의 실제 그림을 그대로 배치**한다.
@@ -168,68 +169,50 @@ _Note: 왜 FFT·곡선·torsion인가에 집중._
 
 _Note: 예비 결과, held-out PDBbind test. 아직 비나급 아님 — 올라가는 중._
 
-## Slide 14 — The pose is where it pays off (hypothesis check)
-- Affinity-only channels barely move r — but **our hypothesis is about the POSE**
-- On **native-pose recognition**, the same channels (physically weighted) succeed strongly
-- Supports the hypothesis: using the pose, not just an affinity number, is where the gain is
+## Slide 14 — Weights learned for the pose recognize the native pose
+- Affinity-fit weights **fail** at the pose task — different objective (ranking, not magnitude)
+- **Pose weights are learned separately** by ranking native > decoys (supervised on RMSD, not affinity)
+- They recognize the native pose strongly — supports the hypothesis
 
 🖼 **`figures/pose_recognition.png`**  ← 실험 결과
 
-| weighting of the same channels | top-scored pose < 2 Å (n = 250) |
+| weighting of the same 8 channels | top-1 pose < 2 Å (n = 1200) |
 |---|---|
-| affinity-fit weights | 2.4% |
-| contact only | 53% |
-| **physical pose weights** | **99.6%** |
+| affinity-fit weights | 3.2% |
+| **learned pose weights** | **94.0%** |
 
-_Note: 가설("포즈까지 보면 낫다")을 지지하는 결과. 디코이=native 강체 교란(국소 funnel, blind 아님)._
+_Note: w_pose는 pairwise 순위학습(라벨=RMSD). 디코이=native 강체 교란(국소 funnel, blind 아님)._
 
 ## Slide 15 — It binds like THIS; we predict THAT
 - Crystal (true) pose vs our top-ranked predicted pose, overlaid in the pocket
-- Held-out complexes; predicted pose picked by score (native not given)
-- They nearly coincide — **RMSD 1.16 Å and 0.95 Å**
+- Held-out complexes; predicted pose picked by the **learned pose weights** (native not given)
+- They nearly coincide — **RMSD 0.40 Å and 0.68 Å** (4u0s, 3ay0)
 
 🖼 **`figures/pose_example.png`**  ← 실험 결과 (남색=실제 결정구조, 골드=예측)
 _Note: 키메라용 PDB 제공 — `example_structures/`의 protein + ligand_native(NAT) + ligand_predicted(PRD)._
-
-## Slide 16 — The scoring funnel toward the native pose (optional)
-- Score vs RMSD for three weightings of the **same** channels
-- Contact already funnels; physical weights sharpen it; affinity weights do not
-
-🖼 **`figures/pose_funnel.png`**  ← 실험 결과
-_Note: 시간 없으면 Slide 14·15로 충분._
 
 ---
 
 # Discussion
 
-## Slide 17 — Limitations (1 slide)
-- **Scorer still weak:** affinity correlation ~r 0.5 at the crystal pose — below a useful
-  scorer and not yet at classical-docking level
-- **Pose result is a local funnel, not blind docking:** decoys are rigid perturbations with
-  the native always present; true blind global docking is untested
-- **Crude inputs:** Gasteiger-on-PDB / name-based atom typing; better force-field charges did
-  **not** help affinity r (an honest negative result)
-- **Cognate redocking on PDBbind only:** no external affinity test, no enrichment (LIT-PCBA)
-  or PoseBusters pose benchmark yet
+## Slide 16 — Limitations & further study (1 slide, two columns)
+**Limitations**
+- **Scorer still weak:** affinity correlation ~r 0.5 at the crystal pose — not yet useful-grade
+- **Local funnel, not blind docking:** decoys are rigid perturbations with the native always present
+- **Crude inputs:** Gasteiger-on-PDB / name-based typing; better charges did **not** help affinity r
+- **PDBbind only:** no external affinity test, no LIT-PCBA / PoseBusters benchmark yet
 
-🖼 (텍스트 슬라이드)
-_Note: 한계를 숨기지 않는다 — 약한 점수함수, 국소 funnel, 거친 입력, 벤치마크 미완._
+**Further study**
+- **Blind FFT docking** — leave the local funnel, search the landscape from scratch
+- **Integrate torsion into the FFT search** (the full novelty)
+- **Benchmarks:** PoseBusters (RMSD<2 Å), LIT-PCBA (EF/BEDROC)
+- **Animal-biotech application — TBK1** (aging / fat accumulation `[cite]`): screen COCONUT
+  natural products, betaine as positive control `[cite]`
 
----
+🖼 (텍스트 슬라이드, 2단)
+_Note: 한계를 숨기지 않고 바로 다음 단계로. 동물생명공학 중요성은 TBK1 예시로._
 
-# Further study
-
-## Slide 18 — Further study & why it matters for animal biotechnology (1 slide)
-- **Method:** learn pose-appropriate weights; move to **blind FFT docking**; run PoseBusters
-  (RMSD<2 Å) and LIT-PCBA (EF/BEDROC) benchmarks
-- **Animal-biotechnology relevance — example TBK1:** TBK1 is a target linked to **aging and
-  fat accumulation** `[cite]`; a faithful screen could find natural-product modulators of
-  animal metabolism and health
-- **Plan:** screen natural products (COCONUT) against TBK1, recovering known binders such as
-  **betaine** as a positive control `[cite]`
-
-🖼 (텍스트 슬라이드; 원하면 TBK1 구조 도식)
-_Note: 동물생명공학 중요성은 여기서 TBK1 예시로. 노화·지방축적 표적에 천연물 스크리닝, betaine 양성대조._
+## Slide 17 — Thank you
 
 ---
 
@@ -237,9 +220,9 @@ _Note: 동물생명공학 중요성은 여기서 TBK1 예시로. 노화·지방�
 | 파일 | 슬라이드 | 내용 |
 |---|---|---|
 | channel_climb.png | 13 | 채널 추가에 따른 held-out test r 상승 |
-| pose_recognition.png | 14 | 가중치별 native 포즈 인식률 (2.4 / 53 / 99.6%) |
-| pose_example.png | 15 | 실제(결정) vs 예측 포즈 오버레이 (RMSD 1.16 / 0.95 Å) |
-| pose_funnel.png | 16 | 점수 vs RMSD 깔때기 (가중치 3종) |
+| pose_recognition.png | 14 | 친화도 vs 학습 포즈 가중치 native 인식률 (3.2 / 94.0%) |
+| pose_example.png | 15 | 실제(결정) vs 예측 포즈 오버레이 (RMSD 0.40 / 0.68 Å) |
+| fragmentation.png · field_change.png · torsion_curve.png | M&M 15 | 분절 · 장 변화 · E(θ) 곡선 |
 
 개념 도식(Intro/Objective/M&M)은 `../slides/assets/`를 쓰거나 새로 제작.
 인용: DrugCLIP arXiv:2310.06367 · 스칼라장(ESF) arXiv:2312.04323 · BindCLIP `[cite 확인]` ·

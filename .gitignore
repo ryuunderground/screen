@@ -17,3 +17,8 @@ slides/*.pptx
 
 # example structures derived from PDBbind (kept local, not redistributed)
 presentation/example_structures/
+
+# pptx decks (derived; may embed PDBbind-derived structures) — kept local
+*.pptx
+# stray local screenshots
+pose_example/

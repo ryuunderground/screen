@@ -29,6 +29,7 @@ src/
   v6_features.py                                 + better partial charges (MMFF + formal) — negative result
   v{3..6}_train.py / run_v{1..6}_features.sh     training + sharded feature extraction per version
   v7_pose.py / v7_fig.py                         pose scoring-funnel test + figures
+  pose_learn.py                                  learn pose-ranking weights (native > decoys by RMSD)
   make_example_figs.py                           result figures + example PDB export
   make_figures.py / make_slides.py               schematic figures / slide generation
   fourier_basics.py / toy_docking_2d.py / concepts_equivariance.py / torsion_spectrum.py /
@@ -78,13 +79,14 @@ A *useful* scorer is ~0.7–0.8, so this is still a weak scorer — the point is
 what it teaches. H-bond count and charge quality barely move affinity r (an honest finding:
 affinity is the wrong yardstick for them). Where they pay off is the **pose**:
 
-| weighting of the same channels | native pose recognized (top-1 < 2 Å, n=250) |
+| weighting of the same channels | native pose recognized (top-1 < 2 Å, n=1200) |
 |---|---|
-| affinity-fit weights | 2.4% |
-| contact only | 53% |
-| physical pose weights | 99.6% |
+| affinity-fit weights | 3.2% |
+| **learned pose weights** | **94.0%** |
 
-(Scoring-funnel / cognate-redocking test with the native always present — not blind docking.)
+Pose weights are **learned separately** from affinity — by pairwise ranking (native scores
+above decoys, supervised on RMSD, not affinity). Scoring-funnel / cognate-redocking test with
+the native always present — not blind docking. Example overlays: RMSD 0.40 / 0.68 Å (4u0s, 3ay0).
 
 ## Running
 Python ≥3.11 with numpy, scipy, scikit-learn, pandas, matplotlib, rdkit (see
@@ -95,5 +97,6 @@ structures. This repo is a prototype, not a packaged tool.
 ## Status & next
 - Working: data pipeline, channels, FFT engine, torsion, cluster-aware CV evaluation.
 - Gap: affinity scorer ~r 0.5 at the crystal pose; pose test is a local funnel, not blind docking.
-- Next: learn pose-appropriate weights; blind FFT docking; PoseBusters / LIT-PCBA benchmarks;
-  apply to an animal-biotechnology target (natural-product screening against TBK1).
+- Done: pose-appropriate weights are now learned (94% top-1 vs 3.2% for affinity-fit weights).
+- Next: blind FFT docking; PoseBusters / LIT-PCBA benchmarks; apply to an
+  animal-biotechnology target (natural-product screening against TBK1).
