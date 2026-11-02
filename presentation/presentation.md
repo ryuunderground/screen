@@ -121,15 +121,21 @@ _Note: 목표 = 내부 torsion 고려한 포즈 예측. 가설 = 포즈까지 �
 🖼 `[개념 도식]` 클러스터 CV + held-out (또는 `../slides/assets/cv_split.png`)
 _Note: 평가는 예측 pKd vs 실험 pKd. 누출 방지(같은 단백질 패밀리 암기 방지)가 핵심 rationale._
 
-## Slide 11 — A molecule as a multi-channel field (rationale)
-- Render receptor & ligand as fields on a grid, **one channel per interaction type**
-- Channels mirror binding physics: contact/shape, clash, hydrophobic, H-bond,
-  electrostatics, desolvation
-- Score = **weighted sum of channel overlaps**; only the weights are learned (labels =
-  experimental affinity)
+## Slide 11 — Representation & score: molecule as multi-channel field
+**(1) 표현** — render receptor & ligand as fields on a grid, **one channel per interaction type**
+(contact/shape, clash, hydrophobic, H-bond, electrostatics, desolvation)
 
-🖼 `[개념 도식]` 다채널 장 표현 (또는 `../slides/assets/field_channels.png`)
-_Note: 채널 = 물리 상호작용을 각각 장으로. 학습은 가중치만._
+**(2) 점수** — overlap the two molecules' fields and sum:
+```
+Vina :  score = Σ (atom-pair interaction terms)      — molecule as POINTS
+Ours :  Score = Σ wᵢ · overlapᵢ  (per-channel field overlap)  — molecule as FIELDS
+```
+- Mathematically isomorphic to Vina's pair terms — but as fields, **FFT can sweep the whole
+  pose at once** (→ Slide 12)
+- **Only the weights wᵢ are learned; labels = experimental affinity (pKd), not binary bind/no-bind**
+
+🖼 `[개념 도식]` 다채널 장 표현 + 겹침 합산 (또는 `../slides/assets/field_channels.png`)
+_Note: (1) 분자를 여러 장으로 → (2) 장 겹침의 가중합이 점수. wᵢ만 학습, 라벨은 연속 친화도._
 
 ## Slide 12 — Scoring the pose landscape by FFT + torsion (rationale)
 - One FFT gives the overlap at **every translation** for a fixed orientation → max over
