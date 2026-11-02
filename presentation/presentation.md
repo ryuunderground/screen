@@ -134,8 +134,10 @@ Ours :  Score = Σ wᵢ · overlapᵢ  (per-channel field overlap)  — molecule
   pose at once** (→ Slide 12)
 - **Only the weights wᵢ are learned; labels = experimental affinity (pKd), not binary bind/no-bind**
 
-🖼 `[개념 도식]` 다채널 장 표현 + 겹침 합산 (또는 `../slides/assets/field_channels.png`)
-_Note: (1) 분자를 여러 장으로 → (2) 장 겹침의 가중합이 점수. wᵢ만 학습, 라벨은 연속 친화도._
+🖼 **`figures/field_cube.png`** — ligand & receptor rendered as 3D field cubes
+(R³→scalar), one cube per channel: Structure / H-bond / Hydrophobic
+_Note: (1) 분자를 여러 3D 장(큐브)으로 → (2) 두 장의 겹침 가중합이 점수. wᵢ만 학습, 라벨은 연속 친화도._
+_(개념 도식: 실제 리간드/주머니 원자에서 계산한 장. 점수는 v5에선 pairwise이나, "이런 장을 겹친다"는 표현용.)_
 
 ## Slide 12 — Scoring the pose landscape by FFT + torsion (rationale)
 - One FFT gives the overlap at **every translation** for a fixed orientation → max over
