@@ -111,7 +111,17 @@ _Note: 목표 = 내부 torsion 고려한 포즈 예측. 가설 = 포즈까지 �
 # Materials & Methods
 *(rationale 중심 — 세부 구현 생략)*
 
-## Slide 10 — A molecule as a multi-channel field (rationale)
+## Slide 10 — Data & evaluation (what we used)
+- PDBbind v2020 general: index **19,037** labeled complexes → **used 18,137**
+- Kept only: clean `=` affinity (Kd/Ki/IC50 → pKd) **and** an LP-PDBBind leak-proof split assigned
+- **Dropped 900:** 270 non-clean affinity (`~`,`<`,`>`/unparseable) + 630 with no leak-proof split assigned
+- **test 4,753 frozen**; remaining **13,384** (train+val pooled) → **cluster-aware 5-fold CV** (no protein leakage)
+- Metric = **predicted vs experimental affinity** (Pearson r, Spearman ρ, RMSE); pose measured separately
+
+🖼 `[개념 도식]` 클러스터 CV + held-out (또는 `../slides/assets/cv_split.png`)
+_Note: 평가는 예측 pKd vs 실험 pKd. 누출 방지(같은 단백질 패밀리 암기 방지)가 핵심 rationale._
+
+## Slide 11 — A molecule as a multi-channel field (rationale)
 - Render receptor & ligand as fields on a grid, **one channel per interaction type**
 - Channels mirror binding physics: contact/shape, clash, hydrophobic, H-bond,
   electrostatics, desolvation
@@ -121,7 +131,7 @@ _Note: 목표 = 내부 torsion 고려한 포즈 예측. 가설 = 포즈까지 �
 🖼 `[개념 도식]` 다채널 장 표현 (또는 `../slides/assets/field_channels.png`)
 _Note: 채널 = 물리 상호작용을 각각 장으로. 학습은 가중치만._
 
-## Slide 11 — Scoring the pose landscape by FFT + torsion (rationale)
+## Slide 12 — Scoring the pose landscape by FFT + torsion (rationale)
 - One FFT gives the overlap at **every translation** for a fixed orientation → max over
   orientation & translation = pose + score (the curve's peak)
 - **Internal flexibility:** cut only bonds that move atoms, score fragments on a kinematic tree
@@ -129,16 +139,6 @@ _Note: 채널 = 물리 상호작용을 각각 장으로. 학습은 가중치만.
 
 🖼 `[개념 도식]` FFT 상관 지형 / torsion 트리 (또는 `../slides/assets/corr_landscape.png`)
 _Note: 왜 FFT·곡선·torsion인가에 집중._
-
-## Slide 12 — Data & evaluation (rationale)
-- PDBbind: **18,137 complexes** (from 19,037; clean `=` affinity + leak-proof split; ~900 dropped)
-- **Cluster-aware 5-fold CV** (grouped by sequence) + frozen held-out test → no protein leakage
-- Metrics compare **predicted vs experimental affinity** (Pearson r, Spearman ρ, RMSE);
-  pose measured separately
-- *Rationale:* cluster splitting prevents "memorizing a protein family" — honest generalization
-
-🖼 `[개념 도식]` 클러스터 CV + held-out (또는 `../slides/assets/cv_split.png`)
-_Note: 평가는 예측 pKd vs 실험 pKd. 누출 방지가 핵심 rationale._
 
 ---
 
@@ -154,9 +154,9 @@ _Note: 평가는 예측 pKd vs 실험 pKd. 누출 방지가 핵심 rationale._
 
 | step | channels | test Ridge r | test GBR r |
 |---|---|---|---|
-| grid overlaps | baseline | 0.38 | 0.46 |
-| Vina-style pair terms | +contact/H-bond/entropy | 0.43 | 0.49 |
-| **+ electrostatics + desolvation** | **best** | **0.46** | **0.52** |
+| grid overlaps | baseline | 0.40 | 0.48 |
+| Vina-style pair terms | +contact/H-bond/entropy | 0.43 | 0.50 |
+| **+ electrostatics + desolvation** | **best** | **0.47** | **0.54** |
 
 _Note: 예비 결과, held-out PDBbind test. 아직 비나급 아님 — 올라가는 중._
 

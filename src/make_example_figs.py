@@ -35,8 +35,8 @@ def seed_of(code):
 
 def climb():
     vers = ["v1\ngrid", "v3\nVina terms", "v4\n+H-bond", "v5\n+elec+desolv", "v6\n+charges"]
-    ridge = [0.382, 0.427, 0.426, 0.460, 0.423]
-    gbr = [0.461, 0.490, 0.493, 0.524, 0.496]
+    ridge = [0.396, 0.429, 0.426, 0.466, 0.429]
+    gbr = [0.477, 0.501, 0.501, 0.537, 0.507]
     x = range(len(vers))
     fig, ax = plt.subplots(figsize=(7.2, 4.0))
     ax.plot(x, gbr, "-o", color=NAVY, lw=2.2, label="nonlinear (GBR)")
@@ -44,7 +44,7 @@ def climb():
     ax.axhspan(0.70, 0.82, color="#8Fae8f", alpha=0.18)
     ax.text(len(vers) - 1, 0.76, "useful scorer\n(~0.7-0.8)", ha="right", va="center",
             fontsize=9, color="#3a5a3a")
-    ax.annotate("best so far", xy=(3, 0.524), xytext=(1.3, 0.60), fontsize=9, color=NAVY,
+    ax.annotate("best so far", xy=(3, 0.537), xytext=(1.3, 0.60), fontsize=9, color=NAVY,
                 arrowprops=dict(arrowstyle="->", color=NAVY))
     ax.set_xticks(list(x)); ax.set_xticklabels(vers, fontsize=9)
     ax.set_ylabel("held-out test correlation (Pearson r)")

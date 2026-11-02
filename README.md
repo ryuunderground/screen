@@ -49,11 +49,12 @@ repo; scripts expect them under a local `data/` and write to `out/` (both git-ig
 - **Used: 18,137.** Kept only complexes that had **both** (a) a clean `=` affinity
   (Kd / Ki / IC50 → pKd = −log₁₀ M) **and** (b) an entry in the LP-PDBBind leak-proof split
   with a sequence cluster.
-- **Dropped: ~900.** Reasons: the affinity was approximate or a range (`~`, `<`, `>`, or an
-  unparseable unit), **or** the complex was not present in LP-PDBBind (no leak-proof split /
-  cluster). These are excluded rather than guessed.
-- Split (LP-PDBBind): **train 11,044 / val 2,340 / test 4,753**; 11,831 sequence clusters
-  used as CV groups so no fold shares a protein.
+- **Dropped: 900.** Two reasons: (a) **270** had a non-clean affinity — approximate or a range
+  (`~`, `<`, `>`), or an unparseable unit (263 approximate/range + 7 unparseable); (b) **630**
+  were in LP-PDBBind but had **no leak-proof split assigned** (blank `new_split`). Excluded
+  rather than guessed.
+- Split (LP-PDBBind): **test 4,753 frozen**; the remaining **13,384** (train + val pooled) run
+  through **cluster-aware 5-fold CV**, grouped by sequence cluster so no fold shares a protein.
 
 **Downloaded and prepared but NOT YET used (benchmarks pending):**
 - **PoseBusters** — intended pose-accuracy benchmark (RMSD < 2 Å); blind docking not run yet.
@@ -67,11 +68,11 @@ Building the scorer up from shape overlaps to a full, Glide-like channel set:
 
 | step | channels | test Ridge r | test GBR r |
 |---|---|---|---|
-| v1 | grid overlaps | 0.38 | 0.46 |
-| v3 | Vina-style pair terms | 0.43 | 0.49 |
-| v4 | + geometric H-bond | 0.43 | 0.49 |
-| **v5** | **+ electrostatics + desolvation** | **0.46** | **0.52** |
-| v6 | + better charges | 0.42 | 0.50 |
+| v1 | grid overlaps | 0.40 | 0.48 |
+| v3 | Vina-style pair terms | 0.43 | 0.50 |
+| v4 | + geometric H-bond | 0.43 | 0.50 |
+| **v5** | **+ electrostatics + desolvation** | **0.47** | **0.54** |
+| v6 | + better charges | 0.43 | 0.51 |
 
 A *useful* scorer is ~0.7–0.8, so this is still a weak scorer — the point is the climb and
 what it teaches. H-bond count and charge quality barely move affinity r (an honest finding:
