@@ -1,0 +1,19 @@
+# environments
+.venv/
+__pycache__/
+*.pyc
+
+# data & results (not pushed — code only)
+out/
+data/
+*.npz
+*.tar.gz
+
+# large binary build artifacts
+slides/*.pptx
+
+# os
+.DS_Store
+
+# example structures derived from PDBbind (kept local, not redistributed)
+presentation/example_structures/
